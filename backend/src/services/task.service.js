@@ -105,11 +105,20 @@ export const getTaskById = async (taskId, userId, userRole) => {
   }
 
   // Check authorization
+  const createdByStr = task.createdBy.toString();
+  const assignedToStr = task.assignedTo.toString();
+  
   if (
     userRole !== 'admin' &&
-    task.createdBy.toString() !== userId &&
-    task.assignedTo.toString() !== userId
+    createdByStr !== userId &&
+    assignedToStr !== userId
   ) {
+    console.error(`[DEBUG] Permission denied for task ${taskId}:`, {
+      userId,
+      userRole,
+      createdBy: createdByStr,
+      assignedTo: assignedToStr,
+    });
     throw new AppError(
       'You do not have permission to view this task.',
       HTTP_STATUS.FORBIDDEN
