@@ -3,6 +3,7 @@ import AppError from '../utils/appError.js';
 import { HTTP_STATUS, TASK_STATUS } from '../config/constants.js';
 import fs from 'fs';
 import path from 'path';
+import mongoose from 'mongoose';
 
 /**
  * Create a new task
@@ -98,34 +99,38 @@ export const getAllTasks = async (page = 1, limit = 10, filters = {}, userId, us
  * Get task by ID
  */
 export const getTaskById = async (taskId, userId, userRole) => {
-  const task = await Task.findById(taskId);
-
-  if (!task) {
-    throw new AppError('Task not found.', HTTP_STATUS.NOT_FOUND);
+  const query = { _id: taskId };
+  
+  // Convert userId to ObjectId for proper MongoDB comparison
+  let userObjectId;
+  try {
+    userObjectId = new mongoose.Types.ObjectId(userId);
+  } catch (error) {
+    userObjectId = userId;
   }
 
-  // Check authorization
-  const createdByStr = task.createdBy.toString();
-  const assignedToStr = task.assignedTo.toString();
-  
-  if (
-    userRole !== 'admin' &&
-    createdByStr !== userId &&
-    assignedToStr !== userId
-  ) {
-    console.error(`[DEBUG] Permission denied for task ${taskId}:`, {
-      userId,
-      userRole,
-      createdBy: createdByStr,
-      assignedTo: assignedToStr,
-    });
+  if (userRole !== 'admin') {
+    query.$or = [
+      { createdBy: userObjectId },
+      { assignedTo: userObjectId },
+    ];
+  }
+
+  const task = await Task.findOne(query);
+
+  if (task) {
+    return task;
+  }
+
+  const exists = await Task.exists({ _id: taskId });
+  if (exists) {
     throw new AppError(
       'You do not have permission to view this task.',
       HTTP_STATUS.FORBIDDEN
     );
   }
 
-  return task;
+  throw new AppError('Task not found.', HTTP_STATUS.NOT_FOUND);
 };
 
 /**
@@ -138,8 +143,11 @@ export const updateTask = async (taskId, updateData, userId, userRole) => {
     throw new AppError('Task not found.', HTTP_STATUS.NOT_FOUND);
   }
 
-  // Check authorization
-  if (userRole !== 'admin' && task.createdBy.toString() !== userId) {
+  // Check authorization - convert both to strings for comparison
+  const createdByStr = task.createdBy.toString();
+  const userIdStr = String(userId);
+  
+  if (userRole !== 'admin' && createdByStr !== userIdStr) {
     throw new AppError(
       'You can only update tasks you created.',
       HTTP_STATUS.FORBIDDEN
@@ -174,8 +182,11 @@ export const deleteTask = async (taskId, userId, userRole) => {
     throw new AppError('Task not found.', HTTP_STATUS.NOT_FOUND);
   }
 
-  // Check authorization
-  if (userRole !== 'admin' && task.createdBy.toString() !== userId) {
+  // Check authorization - convert both to strings for comparison
+  const createdByStr = task.createdBy.toString();
+  const userIdStr = String(userId);
+  
+  if (userRole !== 'admin' && createdByStr !== userIdStr) {
     throw new AppError(
       'You can only delete tasks you created.',
       HTTP_STATUS.FORBIDDEN
