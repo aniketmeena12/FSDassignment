@@ -94,11 +94,11 @@ export const authApi = {
 export const taskApi = {
   getAll: async (token: string, params?: Record<string, any>) => {
     const query = new URLSearchParams(params || {});
-    const result = await apiCall<{ success: boolean; data: { tasks: Task[]; count: number } }>(
+    const result = await apiCall<{ success: boolean; data: { tasks: Task[]; pagination: { total: number } } }>(
       `/tasks?${query}`,
       { method: "GET", token }
     );
-    return { data: result.data?.tasks, count: result.data?.count };
+    return { data: result.data?.tasks, count: result.data?.pagination?.total };
   },
 
   getById: async (id: string, token: string) => {
