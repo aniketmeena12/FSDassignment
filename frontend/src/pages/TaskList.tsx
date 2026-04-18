@@ -21,7 +21,7 @@ const TaskList = () => {
   const { token } = useAuth();
   const [tasks, setTasks] = useState<any[]>([]);
   const [count, setCount] = useState(0);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [status, setStatus] = useState<Status>("all");
   const [priority, setPriority] = useState<Priority>("all");
   const [sort, setSort] = useState<Sort>("created_at");
@@ -73,7 +73,7 @@ const TaskList = () => {
         <span className="font-mono text-[10px] text-text-muted uppercase tracking-widest">
           Filter
         </span>
-        <Select value={status} onValueChange={(v) => { setStatus(v as Status); setPage(0); }}>
+        <Select value={status} onValueChange={(v) => { setStatus(v as Status); setPage(1); }}>
           <SelectTrigger className="w-36 h-8 rounded-none bg-surface-raised border-border-crisp font-mono text-xs">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -85,7 +85,7 @@ const TaskList = () => {
             <SelectItem value="done">Complete</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={priority} onValueChange={(v) => { setPriority(v as Priority); setPage(0); }}>
+        <Select value={priority} onValueChange={(v) => { setPriority(v as Priority); setPage(1); }}>
           <SelectTrigger className="w-36 h-8 rounded-none bg-surface-raised border-border-crisp font-mono text-xs">
             <SelectValue />
           </SelectTrigger>
@@ -161,18 +161,18 @@ const TaskList = () => {
 
       <div className="flex items-center justify-between px-6 py-3 border-t border-border bg-surface-base">
         <div className="font-mono text-[10px] text-text-muted uppercase tracking-widest">
-          {count} directives · page {page + 1} / {totalPages}
+          {count} directives · page {page} / {totalPages}
         </div>
         <div className="flex gap-1">
           <button
-            disabled={page === 0}
+            disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}
             className="border border-border-crisp p-1.5 disabled:opacity-30 hover:bg-surface-raised"
           >
             <ChevronLeft className="w-3 h-3" />
           </button>
           <button
-            disabled={page + 1 >= totalPages}
+            disabled={page >= totalPages}
             onClick={() => setPage((p) => p + 1)}
             className="border border-border-crisp p-1.5 disabled:opacity-30 hover:bg-surface-raised"
           >
