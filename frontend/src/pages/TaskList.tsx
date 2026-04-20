@@ -10,9 +10,16 @@ import {
 } from "@/components/ui/select";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 
-type Status = "all" | "todo" | "in_progress" | "blocked" | "done";
-type Priority = "all" | "low" | "medium" | "high" | "critical";
+type Status = "all" | "pending" | "in_progress" | "completed";
+type Priority = "all" | "low" | "medium" | "high";
 type Sort = "due_date" | "priority" | "status" | "created_at";
+
+const SORT_BY_MAP: Record<Sort, string> = {
+  created_at: "createdAt",
+  due_date: "dueDate",
+  priority: "priority",
+  status: "status",
+};
 
 const PAGE = 10;
 
@@ -36,7 +43,8 @@ const TaskList = () => {
         const params: any = {
           page,
           limit: PAGE,
-          sort,
+          sortBy: SORT_BY_MAP[sort],
+          sortOrder: sort === "created_at" ? "desc" : "asc",
         };
         if (status !== "all") params.status = status;
         if (priority !== "all") params.priority = priority;
@@ -79,10 +87,9 @@ const TaskList = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All states</SelectItem>
-            <SelectItem value="todo">Queued</SelectItem>
+            <SelectItem value="pending">Queued</SelectItem>
             <SelectItem value="in_progress">Running</SelectItem>
-            <SelectItem value="blocked">Halted</SelectItem>
-            <SelectItem value="done">Complete</SelectItem>
+            <SelectItem value="completed">Complete</SelectItem>
           </SelectContent>
         </Select>
         <Select value={priority} onValueChange={(v) => { setPriority(v as Priority); setPage(1); }}>
@@ -94,7 +101,6 @@ const TaskList = () => {
             <SelectItem value="low">Low</SelectItem>
             <SelectItem value="medium">Medium</SelectItem>
             <SelectItem value="high">High</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
           </SelectContent>
         </Select>
         <span className="font-mono text-[10px] text-text-muted uppercase tracking-widest ml-auto">

@@ -15,8 +15,8 @@ export interface Task {
   _id: string;
   title: string;
   description?: string;
-  status: "todo" | "in_progress" | "blocked" | "done";
-  priority: "low" | "medium" | "high" | "critical";
+  status: "pending" | "in_progress" | "completed";
+  priority: "low" | "medium" | "high";
   dueDate?: string;
   createdBy?: User;
   assignedTo?: User;
@@ -72,15 +72,19 @@ export const authApi = {
     return result.data;
   },
 
-  getCurrentUser: (token: string) =>
-    apiCall<User>("/auth/me", { method: "GET", token }),
+  getCurrentUser: async (token: string) => {
+    const result = await apiCall<{ success: boolean; data: User }>("/auth/me", { method: "GET", token });
+    return result.data;
+  },
 
-  updateProfile: (data: any, token: string) =>
-    apiCall<User>("/auth/profile", {
+  updateProfile: async (data: any, token: string) => {
+    const result = await apiCall<{ success: boolean; data: User }>("/auth/profile", {
       method: "PUT",
       body: JSON.stringify(data),
       token,
-    }),
+    });
+    return result.data;
+  },
 
   changePassword: (currentPassword: string, newPassword: string, token: string) =>
     apiCall<{ message: string }>("/auth/change-password", {

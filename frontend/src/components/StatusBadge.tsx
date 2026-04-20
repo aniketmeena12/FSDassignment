@@ -1,9 +1,11 @@
-type Status = "todo" | "in_progress" | "blocked" | "done";
+type Status = "pending" | "in_progress" | "completed" | "todo" | "blocked" | "done";
 type Priority = "low" | "medium" | "high" | "critical";
 
 const statusMap: Record<Status, { label: string; dot: string; text: string }> = {
+  pending: { label: "Queued", dot: "bg-text-muted", text: "text-text-muted" },
   todo: { label: "Queued", dot: "bg-text-muted", text: "text-text-muted" },
   in_progress: { label: "Running", dot: "bg-status-run", text: "text-text-bright" },
+  completed: { label: "Complete", dot: "bg-status-done", text: "text-text-dim" },
   blocked: { label: "Halted", dot: "bg-status-halt", text: "text-text-muted" },
   done: { label: "Complete", dot: "bg-status-done", text: "text-text-dim" },
 };

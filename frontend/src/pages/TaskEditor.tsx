@@ -16,8 +16,8 @@ import { toast } from "sonner";
 const schema = z.object({
   title: z.string().trim().min(1, "Title required").max(200),
   description: z.string().trim().max(2000).optional(),
-  status: z.enum(["todo", "in_progress", "blocked", "done"]),
-  priority: z.enum(["low", "medium", "high", "critical"]),
+  status: z.enum(["pending", "in_progress", "completed"]),
+  priority: z.enum(["low", "medium", "high"]),
   dueDate: z.string().optional(),
   assignedTo: z.string().optional(),
 });
@@ -31,14 +31,14 @@ const TaskEditor = () => {
   const [form, setForm] = useState<{
     title: string;
     description: string;
-    status: "todo" | "in_progress" | "blocked" | "done";
-    priority: "low" | "medium" | "high" | "critical";
+    status: "pending" | "in_progress" | "completed";
+    priority: "low" | "medium" | "high";
     dueDate: string;
     assignedTo: string;
   }>({
     title: "",
     description: "",
-    status: "todo",
+    status: "pending",
     priority: "medium",
     dueDate: "",
     assignedTo: "",
@@ -87,11 +87,11 @@ const TaskEditor = () => {
     setLoading(true);
     const payload: any = {
       title: form.title,
-      description: form.description || null,
       status: form.status,
       priority: form.priority,
-      dueDate: form.dueDate || null,
-      assignedTo: form.assignedTo || null,
+      ...(form.description.trim() ? { description: form.description.trim() } : {}),
+      ...(form.dueDate ? { dueDate: form.dueDate } : {}),
+      ...(form.assignedTo ? { assignedTo: form.assignedTo } : {}),
     };
 
     try {
@@ -156,10 +156,9 @@ const TaskEditor = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todo">Queued</SelectItem>
+                <SelectItem value="pending">Queued</SelectItem>
                 <SelectItem value="in_progress">Running</SelectItem>
-                <SelectItem value="blocked">Halted</SelectItem>
-                <SelectItem value="done">Complete</SelectItem>
+                <SelectItem value="completed">Complete</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -175,7 +174,6 @@ const TaskEditor = () => {
                 <SelectItem value="low">Low</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="high">High</SelectItem>
-                <SelectItem value="critical">Critical</SelectItem>
               </SelectContent>
             </Select>
           </div>
